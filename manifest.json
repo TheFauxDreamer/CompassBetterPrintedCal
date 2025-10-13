@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Calendar Term Printer",
+  "version": "1.0",
+  "description": "Capture calendar events and generate printable term view",
+  "permissions": [
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["injector.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["calendar.html", "interceptor.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
