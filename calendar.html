@@ -274,33 +274,184 @@
     }
 
     @media print {
+      @page {
+        margin: 0.5cm;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+
+      body {
+        background: white;
+        padding: 0;
+        margin: 0;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .calendar-container {
+        box-shadow: none;
+        padding: 10px;
+        margin: 0;
+        background: white;
+      }
+
+      h1 {
+        font-size: 18px;
+        margin-bottom: 10px;
+        color: #333;
+      }
+
+      .term-header {
+        font-size: 14px;
+        padding: 8px 12px;
+        page-break-after: avoid;
+        background: #007bff !important;
+        color: white !important;
+      }
+
+      .term-section {
+        page-break-inside: avoid;
+        margin-bottom: 15px;
+      }
+
       .calendar-grid {
         page-break-inside: avoid;
+        width: 100%;
+        border: 1px solid #ddd !important;
       }
 
-      .calendar-week {
-        min-height: 80px;
-        page-break-inside: avoid;
-      }
-      
-      .calendar-day {
-        min-height: 80px;
-        font-size: 9px;
-        padding: 3px 4px;
-      }
-      
-      .calendar-event {
-        font-size: 8px;
-        padding: 1px 3px;
-      }
-
-      .day-number {
-        font-size: 11px;
+      .calendar-header {
+        background: #f8f9fa !important;
+        border-bottom: 2px solid #ddd !important;
       }
 
       .day-name {
-        padding: 6px 4px;
+        padding: 4px 2px;
+        font-size: 10px;
+        border-right: 1px solid #ddd !important;
+        color: #555 !important;
+      }
+
+      .week-number {
+        font-size: 10px;
+        padding: 4px 2px;
+        background: #f8f9fa !important;
+        border-right: 2px solid #ddd !important;
+        color: #555 !important;
+      }
+
+      .calendar-week {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        border-bottom: 1px solid #ddd !important;
+      }
+      
+      .calendar-day {
+        padding: 2px 4px;
+        border-right: 1px solid #ddd !important;
+      }
+
+      .calendar-day.other-month {
+        background: #fafafa !important;
+      }
+
+      .calendar-day.weekend {
+        background: #f8f9fa !important;
+      }
+      
+      .day-number {
+        font-size: 10px;
+        margin-bottom: 2px;
+        color: #333 !important;
+      }
+
+      .calendar-event {
+        font-size: 7px;
+        padding: 1px 2px;
+        margin: 1px 0;
+        line-height: 1.1;
+        border-radius: 2px !important;
+        /* Colors are inline styles, so they'll be preserved */
+      }
+
+      .event-time {
+        font-size: 6px;
+        color: inherit !important;
+      }
+    }
+
+    /* A4 specific styles */
+    body.print-a4 .calendar-week {
+      min-height: 70px;
+    }
+
+    body.print-a4 .calendar-day {
+      min-height: 70px;
+    }
+
+    @media print {
+      body.print-a4 .calendar-week {
+        min-height: 60px;
+      }
+      
+      body.print-a4 .calendar-day {
+        min-height: 60px;
+      }
+    }
+
+    /* A3 specific styles */
+    body.print-a3 .calendar-week {
+      min-height: 100px;
+    }
+
+    body.print-a3 .calendar-day {
+      min-height: 100px;
+    }
+
+    @media print {
+      body.print-a3 .calendar-week {
+        min-height: 90px;
+      }
+      
+      body.print-a3 .calendar-day {
+        min-height: 90px;
+      }
+
+      body.print-a3 .day-number {
         font-size: 11px;
+      }
+
+      body.print-a3 .day-name {
+        font-size: 11px;
+        padding: 5px 3px;
+      }
+
+      body.print-a3 .week-number {
+        font-size: 11px;
+      }
+
+      body.print-a3 .calendar-event {
+        font-size: 8px;
+        padding: 2px 3px;
+      }
+
+      body.print-a3 .event-time {
+        font-size: 7px;
+      }
+
+      body.print-a3 h1 {
+        font-size: 20px;
+      }
+
+      body.print-a3 .term-header {
+        font-size: 16px;
+        padding: 10px 15px;
       }
     }
 
@@ -384,7 +535,7 @@
 <body>
   <div class="no-print">
     <div class="controls">
-      <button onclick="window.print()">🖨️ Print Calendar</button>
+      <button id="printButton">🖨️ Print Calendar</button>
       <select id="viewMode">
         <option value="term">Term Calendar View</option>
         <option value="monthly">Monthly Calendar View</option>
@@ -393,6 +544,10 @@
       </select>
       <select id="termFilter">
         <option value="all">All Terms</option>
+      </select>
+      <select id="paperSize">
+        <option value="a4">A4 Paper</option>
+        <option value="a3">A3 Paper</option>
       </select>
       <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 8px 12px; background: white; border: 1px solid #ddd; border-radius: 4px;">
         <input type="checkbox" id="hideWeekendsToggle" style="cursor: pointer;">

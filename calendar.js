@@ -13,6 +13,7 @@ let currentView = 'term';
 let enabledLayers = new Set();
 let eventLayers = new Map(); // Map of color to layer info
 let hideWeekends = false;
+let paperSize = 'a4';
 
 // Load calendar and term data
 chrome.runtime.sendMessage({ type: 'GET_ALL_DATA' }, (data) => {
@@ -38,6 +39,7 @@ chrome.runtime.sendMessage({ type: 'GET_ALL_DATA' }, (data) => {
     identifyLayers();
     populateTermFilter();
     setupEventListeners();
+    updatePaperSize();
     renderCalendar();
   } else {
     document.getElementById('calendarContent').innerHTML = 
@@ -45,8 +47,19 @@ chrome.runtime.sendMessage({ type: 'GET_ALL_DATA' }, (data) => {
   }
 });
 
+// Update paper size class on body
+function updatePaperSize() {
+  document.body.classList.remove('print-a4', 'print-a3');
+  document.body.classList.add(`print-${paperSize}`);
+}
+
 // Setup event listeners
 function setupEventListeners() {
+  // Print button
+  document.getElementById('printButton').addEventListener('click', () => {
+    window.print();
+  });
+
   // View mode change
   document.getElementById('viewMode').addEventListener('change', (e) => {
     currentView = e.target.value;
@@ -62,6 +75,12 @@ function setupEventListeners() {
   document.getElementById('hideWeekendsToggle').addEventListener('change', (e) => {
     hideWeekends = e.target.checked;
     renderCalendar();
+  });
+
+  // Paper size change
+  document.getElementById('paperSize').addEventListener('change', (e) => {
+    paperSize = e.target.value;
+    updatePaperSize();
   });
 }
 
@@ -172,6 +191,10 @@ function parseAUDate(dateStr) {
 // Populate term filter
 function populateTermFilter() {
   const termFilter = document.getElementById('termFilter');
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  let currentTermId = null;
   
   if (allTerms.length > 0) {
     allTerms.forEach(term => {
@@ -179,7 +202,17 @@ function populateTermFilter() {
       option.value = `term-${term.id}`;
       option.textContent = `${term.name} ${term.year}`;
       termFilter.appendChild(option);
+      
+      // Check if today falls within this term
+      if (today >= term.startDate && today <= term.endDate) {
+        currentTermId = term.id;
+      }
     });
+    
+    // Select the current term if found
+    if (currentTermId) {
+      termFilter.value = `term-${currentTermId}`;
+    }
   }
   
   const years = [...new Set(allEvents.map(e => e.startDate.getFullYear()))].sort();
