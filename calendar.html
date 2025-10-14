@@ -388,65 +388,69 @@
 
     /* A4 specific styles */
     body.print-a4 .calendar-week {
-      min-height: 70px;
+      min-height: 100px;
     }
 
     body.print-a4 .calendar-day {
-      min-height: 70px;
+      min-height: 100px;
     }
 
     @media print {
       body.print-a4 .calendar-week {
-        min-height: 60px;
+        min-height: 120px; /* Increased for writing space */
       }
       
       body.print-a4 .calendar-day {
-        min-height: 60px;
+        min-height: 120px; /* ~8 events high + writing space */
       }
     }
 
     /* A3 specific styles */
     body.print-a3 .calendar-week {
-      min-height: 100px;
+      min-height: 140px;
     }
 
     body.print-a3 .calendar-day {
-      min-height: 100px;
+      min-height: 140px;
     }
 
     @media print {
       body.print-a3 .calendar-week {
-        min-height: 90px;
+        min-height: 160px; /* More space on A3 */
       }
       
       body.print-a3 .calendar-day {
-        min-height: 90px;
+        min-height: 160px; /* ~8-10 events high + writing space */
       }
 
       body.print-a3 .day-number {
-        font-size: 11px;
+        font-size: 12px;
+        margin-bottom: 4px;
       }
 
       body.print-a3 .day-name {
-        font-size: 11px;
-        padding: 5px 3px;
+        font-size: 12px;
+        padding: 6px 4px;
       }
 
       body.print-a3 .week-number {
-        font-size: 11px;
+        font-size: 12px;
+        padding: 6px 4px;
       }
 
       body.print-a3 .calendar-event {
-        font-size: 8px;
-        padding: 2px 3px;
+        font-size: 9px;
+        padding: 2px 4px;
+        margin: 2px 0;
       }
 
       body.print-a3 .event-time {
-        font-size: 7px;
+        font-size: 8px;
       }
 
       body.print-a3 h1 {
-        font-size: 20px;
+        font-size: 22px;
+        margin-bottom: 12px;
       }
 
       body.print-a3 .term-header {
