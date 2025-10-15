@@ -410,7 +410,7 @@ function renderCalendarGrid(startDate, endDate, events, showTermWeeks = false) {
       if (isWeekend) dayClass += ' weekend';
       
       html += `<div class="${dayClass}">`;
-      html += `<div class="day-number">${dayDate.getDate()}</div>`;
+      html += `<div class="day-number">${dayDate.getDate()}<span class="month-abbr"> ${getMonthAbbr(dayDate)}</span></div>`;
       html += '<div class="day-events">';
       
       // Multi-day events (show on all days they span)
@@ -646,6 +646,10 @@ function formatDayHeader(date) {
 
 function formatTime(date) {
   return date.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: true });
+}
+
+function getMonthAbbr(date) {
+  return date.toLocaleDateString('en-AU', { month: 'short' });
 }
 
 function escapeHtml(text) {
