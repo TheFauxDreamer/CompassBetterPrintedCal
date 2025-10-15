@@ -6,6 +6,7 @@ let eventLayers = new Map(); // Map of color to layer info
 let hideWeekends = false;
 let paperSize = 'a4';
 let eventFontSize = 9; // Default font size in pixels
+let compactMode = false; // Compact mode for Windows printing
 
 // Load calendar and term data
 chrome.runtime.sendMessage({ type: 'GET_ALL_DATA' }, (data) => {
@@ -64,6 +65,7 @@ chrome.runtime.sendMessage({ type: 'GET_ALL_DATA' }, (data) => {
     populateTermFilter();
     setupEventListeners();
     updatePaperSize();
+    updateCompactMode(); // Initialize compact mode
     updateFontSize(); // Initialize font size
     renderCalendar();
     console.log('[CALENDAR.JS] ========== Initialization Complete ==========');
@@ -77,6 +79,15 @@ chrome.runtime.sendMessage({ type: 'GET_ALL_DATA' }, (data) => {
 function updatePaperSize() {
   document.body.classList.remove('print-a4', 'print-a3');
   document.body.classList.add(`print-${paperSize}`);
+}
+
+// Update compact mode
+function updateCompactMode() {
+  if (compactMode) {
+    document.body.classList.add('compact-mode');
+  } else {
+    document.body.classList.remove('compact-mode');
+  }
 }
 
 // Update event font size
@@ -111,6 +122,12 @@ function setupEventListeners() {
   document.getElementById('hideWeekendsToggle').addEventListener('change', (e) => {
     hideWeekends = e.target.checked;
     renderCalendar();
+  });
+
+  // Compact mode toggle
+  document.getElementById('compactModeToggle').addEventListener('change', (e) => {
+    compactMode = e.target.checked;
+    updateCompactMode();
   });
 
   // Paper size change

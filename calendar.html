@@ -334,7 +334,7 @@
 
     @media print {
       @page {
-        margin: 0.5cm;
+        margin: 0.3cm;
       }
 
       * {
@@ -355,32 +355,32 @@
 
       .calendar-container {
         box-shadow: none;
-        padding: 10px;
+        padding: 0.3cm;
         margin: 0;
         background: white;
       }
 
       h1 {
-        font-size: 18px;
-        margin-bottom: 10px;
+        font-size: 16px;
+        margin-bottom: 8px;
         color: #333;
       }
 
       .term-header {
-        font-size: 14px;
-        padding: 8px 12px;
+        font-size: 13px;
+        padding: 6px 10px;
         page-break-after: avoid;
         background: #007bff !important;
         color: white !important;
       }
 
       .term-section {
-        page-break-inside: avoid;
-        margin-bottom: 15px;
+        page-break-inside: auto; /* Allow breaking across pages */
+        margin-bottom: 8px;
       }
 
       .calendar-grid {
-        page-break-inside: avoid;
+        page-break-inside: auto; /* Allow breaking across pages */
         width: 100%;
         border: 1px solid #ddd !important;
       }
@@ -406,13 +406,13 @@
       }
 
       .calendar-week {
-        page-break-inside: avoid;
-        break-inside: avoid;
+        page-break-inside: auto; /* Allow breaking if needed */
+        break-inside: auto;
         border-bottom: 1px solid #ddd !important;
       }
       
       .calendar-day {
-        padding: 2px 4px;
+        padding: 2px 3px;
         border-right: 1px solid #ddd !important;
       }
 
@@ -446,24 +446,29 @@
 
     /* A4 specific styles */
     body.print-a4 .calendar-week {
-      min-height: 120px;
+      min-height: 100px;
     }
 
     body.print-a4 .calendar-day {
-      min-height: 120px;
+      min-height: 100px;
     }
 
     @media print {
       body.print-a4 .calendar-week {
-        min-height: 120px;
+        min-height: 95px; /* Good balance for both Mac and Windows */
       }
       
       body.print-a4 .calendar-day {
-        min-height: 120px;
+        min-height: 95px; /* Good balance for both Mac and Windows */
       }
 
       body.print-a4 .day-number .month-abbr {
-        font-size: 8px;
+        font-size: 7px;
+      }
+      
+      body.print-a4 .day-number {
+        font-size: 9px;
+        margin-bottom: 1px;
       }
     }
 
@@ -474,6 +479,52 @@
 
     body.print-a3 .calendar-day {
       min-height: 160px;
+    }
+
+    /* Compact mode for Windows printing */
+    body.compact-mode .calendar-week {
+      min-height: 60px !important;
+    }
+
+    body.compact-mode .calendar-day {
+      min-height: 60px !important;
+    }
+
+    @media print {
+      body.compact-mode .calendar-week {
+        min-height: 50px !important;
+      }
+      
+      body.compact-mode .calendar-day {
+        min-height: 50px !important;
+      }
+
+      body.compact-mode .day-number {
+        font-size: 8px !important;
+        margin-bottom: 1px !important;
+      }
+
+      body.compact-mode .day-number .month-abbr {
+        font-size: 6px !important;
+      }
+
+      body.compact-mode .calendar-container {
+        padding: 3px !important;
+      }
+
+      body.compact-mode h1 {
+        font-size: 14px !important;
+        margin-bottom: 5px !important;
+      }
+
+      body.compact-mode .term-header {
+        font-size: 11px !important;
+        padding: 4px 8px !important;
+      }
+
+      body.compact-mode .term-section {
+        margin-bottom: 5px !important;
+      }
     }
 
     @media print {
@@ -588,6 +639,10 @@
       <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 8px 12px; background: white; border: 1px solid #ddd; border-radius: 4px;">
         <input type="checkbox" id="hideWeekendsToggle" style="cursor: pointer;">
         <span>Hide Weekends</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 8px 12px; background: white; border: 1px solid #ddd; border-radius: 4px;">
+        <input type="checkbox" id="compactModeToggle" style="cursor: pointer;">
+        <span>Compact Print Mode</span>
       </label>
       <div class="font-size-control">
         <label>Event Text Size:</label>
