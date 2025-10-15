@@ -5,6 +5,7 @@ let enabledLayers = new Set();
 let eventLayers = new Map(); // Map of color to layer info
 let hideWeekends = false;
 let paperSize = 'a4';
+let eventFontSize = 9; // Default font size in pixels
 
 // Load calendar and term data
 chrome.runtime.sendMessage({ type: 'GET_ALL_DATA' }, (data) => {
@@ -63,6 +64,7 @@ chrome.runtime.sendMessage({ type: 'GET_ALL_DATA' }, (data) => {
     populateTermFilter();
     setupEventListeners();
     updatePaperSize();
+    updateFontSize(); // Initialize font size
     renderCalendar();
     console.log('[CALENDAR.JS] ========== Initialization Complete ==========');
   } else {
@@ -75,6 +77,16 @@ chrome.runtime.sendMessage({ type: 'GET_ALL_DATA' }, (data) => {
 function updatePaperSize() {
   document.body.classList.remove('print-a4', 'print-a3');
   document.body.classList.add(`print-${paperSize}`);
+}
+
+// Update event font size
+function updateFontSize() {
+  // Update CSS custom property for font size
+  document.documentElement.style.setProperty('--event-font-size', `${eventFontSize}px`);
+  document.documentElement.style.setProperty('--event-time-font-size', `${eventFontSize - 1}px`);
+  
+  // Update the display
+  document.getElementById('fontSizeValue').textContent = eventFontSize;
 }
 
 // Setup event listeners
@@ -105,6 +117,26 @@ function setupEventListeners() {
   document.getElementById('paperSize').addEventListener('change', (e) => {
     paperSize = e.target.value;
     updatePaperSize();
+  });
+  
+  // Font size controls
+  document.getElementById('fontSizeDecrease').addEventListener('click', () => {
+    if (eventFontSize > 6) { // Minimum size
+      eventFontSize--;
+      updateFontSize();
+    }
+  });
+  
+  document.getElementById('fontSizeIncrease').addEventListener('click', () => {
+    if (eventFontSize < 16) { // Maximum size
+      eventFontSize++;
+      updateFontSize();
+    }
+  });
+  
+  document.getElementById('fontSizeReset').addEventListener('click', () => {
+    eventFontSize = 9; // Reset to default
+    updateFontSize();
   });
 }
 

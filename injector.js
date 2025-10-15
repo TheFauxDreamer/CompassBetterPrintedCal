@@ -13,6 +13,21 @@
 
 // Listen for capture requests from popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'CHECK_VIEW') {
+    // Check if Term view is active by looking for the pressed Term button
+    const termButton = document.getElementById('calendar-manager-tb-multiweek');
+    const isTermView = termButton && termButton.classList.contains('x-pressed');
+    
+    console.log('[INJECTOR] View check:', {
+      termButtonFound: !!termButton,
+      isPressed: isTermView,
+      classes: termButton ? termButton.className : 'not found'
+    });
+    
+    sendResponse({ isTermView: isTermView });
+    return true;
+  }
+  
   if (message.type === 'MANUAL_CAPTURE') {
     console.log('');
     console.log('════════════════════════════════════════════════════════');

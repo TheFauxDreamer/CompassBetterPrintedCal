@@ -30,6 +30,26 @@
       background: #f8d7da;
       color: #721c24;
     }
+    .warning {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      color: #856404;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .warning strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+    .warning-icon {
+      display: inline-block;
+      margin-right: 5px;
+      font-size: 16px;
+    }
     button {
       width: 100%;
       padding: 10px;
@@ -68,15 +88,31 @@
       border-radius: 4px;
       line-height: 1.4;
     }
+    .instructions ol {
+      margin: 5px 0 0 0;
+      padding-left: 20px;
+    }
+    .instructions li {
+      margin: 3px 0;
+    }
   </style>
 </head>
 <body>
   <h3>Calendar Term Printer</h3>
   
   <div class="instructions">
-    1. Navigate to your calendar in term view<br>
-    2. Wait for the page to fully load<br>
-    3. Click "Capture Calendar Data" below
+    <strong>Steps to capture:</strong>
+    <ol>
+      <li>Go to your calendar page</li>
+      <li>Select <strong>"Term"</strong> view (not Week/Day/Month)</li>
+      <li>Wait for the page to fully load</li>
+      <li>Click "Capture Calendar Data" below</li>
+    </ol>
+  </div>
+  
+  <div id="viewWarning" class="warning" style="display: none;">
+    <strong><span class="warning-icon">⚠️</span>Wrong Calendar View!</strong>
+    Please switch to <strong>Term</strong> view on the calendar page before capturing data.
   </div>
   
   <button id="captureData" class="secondary">📥 Capture Calendar Data</button>

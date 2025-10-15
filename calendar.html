@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <title>School Term Calendar</title>
   <style>
+    :root {
+      --event-font-size: 9px;
+      --event-time-font-size: 8px;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -29,6 +34,47 @@
       gap: 10px;
       align-items: center;
       flex-wrap: wrap;
+    }
+
+    .font-size-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .font-size-control label {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .font-size-control button {
+      padding: 4px 10px;
+      min-width: 32px;
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .font-size-control .font-size-value {
+      min-width: 30px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .font-size-control .reset-btn {
+      font-size: 12px;
+      padding: 4px 8px;
+      background: #6c757d;
+    }
+
+    .font-size-control .reset-btn:hover {
+      background: #5a6268;
     }
 
     .layer-filters {
@@ -264,7 +310,7 @@
       padding: 2px 4px;
       border-radius: 2px;
       border-left: 2px solid;
-      font-size: 9px;
+      font-size: var(--event-font-size);
       line-height: 1.2;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -282,7 +328,7 @@
     .event-time {
       font-weight: 600;
       margin-right: 2px;
-      font-size: 8px;
+      font-size: var(--event-time-font-size);
       white-space: nowrap;
     }
 
@@ -385,17 +431,16 @@
       }
 
       .calendar-event {
-        font-size: 7px;
         padding: 1px 2px;
         margin: 1px 0;
         line-height: 1.1;
         border-radius: 2px !important;
-        /* Colors are inline styles, so they'll be preserved */
+        /* Font size uses CSS variable which is set by JavaScript */
       }
 
       .event-time {
-        font-size: 6px;
         color: inherit !important;
+        /* Font size uses CSS variable which is set by JavaScript */
       }
     }
 
@@ -410,11 +455,11 @@
 
     @media print {
       body.print-a4 .calendar-week {
-        min-height: 120px; /* Increased for writing space */
+        min-height: 120px;
       }
       
       body.print-a4 .calendar-day {
-        min-height: 120px; /* ~8 events high + writing space */
+        min-height: 120px;
       }
 
       body.print-a4 .day-number .month-abbr {
@@ -433,11 +478,11 @@
 
     @media print {
       body.print-a3 .calendar-week {
-        min-height: 160px; /* More space on A3 */
+        min-height: 160px;
       }
       
       body.print-a3 .calendar-day {
-        min-height: 160px; /* ~8-10 events high + writing space */
+        min-height: 160px;
       }
 
       body.print-a3 .day-number {
@@ -457,16 +502,6 @@
       body.print-a3 .week-number {
         font-size: 12px;
         padding: 6px 4px;
-      }
-
-      body.print-a3 .calendar-event {
-        font-size: 9px;
-        padding: 2px 4px;
-        margin: 2px 0;
-      }
-
-      body.print-a3 .event-time {
-        font-size: 8px;
       }
 
       body.print-a3 h1 {
@@ -531,30 +566,6 @@
       font-size: 13px;
       padding: 5px 0;
     }
-
-    @media print {
-      body {
-        background: white;
-        padding: 0;
-      }
-
-      .no-print {
-        display: none;
-      }
-
-      .calendar-container {
-        box-shadow: none;
-        padding: 20px;
-      }
-
-      .term-section {
-        page-break-inside: avoid;
-      }
-
-      .calendar-week {
-        min-height: 100px;
-      }
-    }
   </style>
 </head>
 <body>
@@ -578,6 +589,13 @@
         <input type="checkbox" id="hideWeekendsToggle" style="cursor: pointer;">
         <span>Hide Weekends</span>
       </label>
+      <div class="font-size-control">
+        <label>Event Text Size:</label>
+        <button id="fontSizeDecrease" title="Decrease font size">−</button>
+        <span class="font-size-value" id="fontSizeValue">9</span>
+        <button id="fontSizeIncrease" title="Increase font size">+</button>
+        <button id="fontSizeReset" class="reset-btn" title="Reset to default">Reset</button>
+      </div>
     </div>
     <div class="layer-filters" id="layerFilters">
       <span class="layer-filters-label">Calendar Layers:</span>
