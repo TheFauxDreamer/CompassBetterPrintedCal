@@ -1,4 +1,4 @@
-# CompassBetterPrintedCal
+# CompassBetterPrintedCal - WINDOWS TEST Version
 Provides an alternative to the stock printable calendar provided from the Compass Calendar module.
 
 This is being created inbetween jobs & in my spare time, updates, feature requestest, & continued support aren't guaranteed.
