@@ -232,10 +232,23 @@
       margin-bottom: 4px;
       color: #333;
       flex-shrink: 0;
+      display: flex;
+      align-items: baseline;
+      gap: 3px;
+    }
+
+    .day-number .month-abbr {
+      font-size: 10px;
+      font-weight: 500;
+      color: #666;
     }
 
     .calendar-day.other-month .day-number {
       color: #999;
+    }
+
+    .calendar-day.other-month .day-number .month-abbr {
+      color: #aaa;
     }
 
     .day-events {
@@ -377,6 +390,7 @@
         margin: 1px 0;
         line-height: 1.1;
         border-radius: 2px !important;
+        /* Colors are inline styles, so they'll be preserved */
       }
 
       .event-time {
@@ -402,15 +416,19 @@
       body.print-a4 .calendar-day {
         min-height: 120px; /* ~8 events high + writing space */
       }
+
+      body.print-a4 .day-number .month-abbr {
+        font-size: 8px;
+      }
     }
 
     /* A3 specific styles */
     body.print-a3 .calendar-week {
-      min-height: 140px;
+      min-height: 160px;
     }
 
     body.print-a3 .calendar-day {
-      min-height: 140px;
+      min-height: 160px;
     }
 
     @media print {
@@ -425,6 +443,10 @@
       body.print-a3 .day-number {
         font-size: 12px;
         margin-bottom: 4px;
+      }
+
+      body.print-a3 .day-number .month-abbr {
+        font-size: 10px;
       }
 
       body.print-a3 .day-name {
@@ -530,7 +552,7 @@
       }
 
       .calendar-week {
-        min-height: 120px;
+        min-height: 100px;
       }
     }
   </style>

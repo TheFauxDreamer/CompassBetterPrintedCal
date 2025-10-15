@@ -1,31 +1,196 @@
-// This script runs in the Compass webpage and can intercept XHR
+// This script runs in the MAIN world and can intercept XHR
 (function() {
-  console.log('Calendar Extension: Interceptor loaded in Compass Webpage');
+  console.log('='.repeat(60));
+  console.log('CALENDAR EXTENSION: Interceptor loaded in main world');
+  console.log('Current URL:', window.location.href);
+  console.log('='.repeat(60));
   
   // Storage for captured responses
   window.__calendarExtension__ = {
     calendarData: null,
     termData: null,
+    calendarLayers: null,
     debug: {
       allRequests: []
     }
   };
   
-  // Listen for data requests via custom events (CSP-safe)
-  window.addEventListener('calendarExtensionRequest', function() {
-    console.log('[COMPASS WEBPAGE] Received request for data');
-    const data = window.__calendarExtension__;
-    console.log('[COMPASS WEBPAGE] Calendar data:', data.calendarData ? data.calendarData.length + ' events' : 'null');
-    console.log('[COMPASS WEBPAGE] Term data:', data.termData ? data.termData.length + ' terms' : 'null');
+  // Simple, robust function to extract calendar layer names from the DOM
+  function extractCalendarLayers() {
+    console.log('');
+    console.log('╔═══════════════════════════════════════════════════════════╗');
+    console.log('║         EXTRACTING CALENDAR LAYERS FROM HTML             ║');
+    console.log('╚═══════════════════════════════════════════════════════════╝');
     
-    // Dispatch response with the data
+    const layers = [];
+    
+    // Try to find the calendar list - try multiple approaches
+    console.log('→ Searching for calendar list container...');
+    
+    // Approach 1: Look for any li.ext-cal-evr elements first
+    const allLayerElements = document.querySelectorAll('li.ext-cal-evr');
+    console.log(`  Found ${allLayerElements.length} li.ext-cal-evr elements on page`);
+    
+    if (allLayerElements.length === 0) {
+      console.error('✗ NO ELEMENTS FOUND! The calendar list might not be visible.');
+      console.log('  Troubleshooting:');
+      console.log('  1. Make sure you are on the calendar page');
+      console.log('  2. Make sure the calendar layer list is visible (left sidebar)');
+      console.log('  3. Try refreshing the page');
+      console.log('╚═══════════════════════════════════════════════════════════╝');
+      return layers;
+    }
+    
+    // Now filter to only get the ones in the actual layer list (not events)
+    console.log('→ Filtering layer list elements (excluding calendar events)...');
+    
+    let layerListElements = [];
+    
+    // Find the container with id containing "calendarlist" and ending with "-body"
+    // BUT exclude the header (which has _header-body in the ID)
+    const allContainers = document.querySelectorAll('[id*="calendarlist"][id$="-body"]');
+    console.log(`  Found ${allContainers.length} total containers with "calendarlist" and "-body"`);
+    
+    // Show all containers found
+    if (allContainers.length > 0) {
+      console.log('  All containers found:');
+      allContainers.forEach((c, i) => {
+        const elementCount = c.querySelectorAll('li.ext-cal-evr').length;
+        console.log(`    ${i + 1}. ${c.id} (${elementCount} elements)`);
+      });
+    }
+    
+    // Filter out headers
+    const containers = Array.from(allContainers).filter(el => !el.id.includes('_header'));
+    console.log(`  After filtering headers: ${containers.length} containers`);
+    
+    if (containers.length > 0) {
+      // Use the first non-header container found
+      const container = containers[0];
+      console.log(`  ✓ Using container: ${container.id}`);
+      layerListElements = container.querySelectorAll('li.ext-cal-evr');
+      console.log(`  ✓ Found ${layerListElements.length} layer elements in container`);
+    } else {
+      // Fallback: just use all of them and filter by parent structure
+      console.log('  ! No container found, using all elements');
+      layerListElements = Array.from(allLayerElements).filter(el => {
+        // Check if parent is a UL that's inside a panel
+        const ul = el.parentElement;
+        return ul && ul.tagName === 'UL' && ul.parentElement;
+      });
+      console.log(`  ✓ Filtered to ${layerListElements.length} elements`);
+    }
+    
+    if (layerListElements.length === 0) {
+      console.error('✗ NO LAYER ELEMENTS FOUND after filtering!');
+      console.log('╚═══════════════════════════════════════════════════════════╝');
+      return layers;
+    }
+    
+    console.log('→ Extracting layer names and colors...');
+    console.log('');
+    
+    // Extract data from each element
+    layerListElements.forEach((el, index) => {
+      const style = el.getAttribute('style');
+      
+      if (!style) {
+        console.warn(`  ${index}: No style attribute`);
+        return;
+      }
+      
+      // Extract color
+      const colorMatch = style.match(/background-color:\s*(#[0-9A-Fa-f]{6})/i);
+      if (!colorMatch) {
+        console.warn(`  ${index}: No color found`);
+        return;
+      }
+      
+      const color = colorMatch[1].toUpperCase();
+      
+      // Extract text (remove <em> tag content)
+      const clone = el.cloneNode(true);
+      const emElement = clone.querySelector('em');
+      if (emElement) emElement.remove();
+      
+      let name = clone.textContent.trim();
+      name = name.replace(/\u00A0/g, ' ').replace(/\s+/g, ' ').trim();
+      
+      if (!name) {
+        console.warn(`  ${index}: No name extracted`);
+        return;
+      }
+      
+      // Check for duplicates
+      const existing = layers.find(l => l.color === color);
+      if (existing) {
+        console.log(`  ${index}: ⊗ Duplicate color ${color}, skipping`);
+        return;
+      }
+      
+      layers.push({ color, name });
+      console.log(`  ${index}: ✓ "${name}" → ${color}`);
+    });
+    
+    console.log('');
+    if (layers.length > 0) {
+      console.log('╔═══════════════════════════════════════════════════════════╗');
+      console.log(`║  SUCCESS! Extracted ${layers.length} calendar layers`);
+      console.log('╚═══════════════════════════════════════════════════════════╝');
+      layers.forEach((l, i) => {
+        console.log(`  ${i + 1}. "${l.name}" (${l.color})`);
+      });
+      
+      window.__calendarExtension__.calendarLayers = layers;
+    } else {
+      console.error('╔═══════════════════════════════════════════════════════════╗');
+      console.error('║  FAILED! No layers extracted                              ║');
+      console.error('╚═══════════════════════════════════════════════════════════╝');
+    }
+    
+    console.log('');
+    return layers;
+  }
+  
+  // Expose for manual testing
+  window.__calendarExtension__.extractLayers = extractCalendarLayers;
+  
+  // Listen for data requests from the extension
+  window.addEventListener('calendarExtensionRequest', function() {
+    console.log('');
+    console.log('▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓');
+    console.log('▓  CAPTURE BUTTON CLICKED - EXTRACTING DATA NOW!          ▓');
+    console.log('▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓');
+    
+    // ALWAYS extract fresh when button is clicked
+    const extractedLayers = extractCalendarLayers();
+    
+    const data = window.__calendarExtension__;
+    
+    // Use fresh data
+    if (extractedLayers.length > 0) {
+      data.calendarLayers = extractedLayers;
+    }
+    
+    console.log('');
+    console.log('→ Preparing data to send:');
+    console.log('  • Calendar events:', data.calendarData ? data.calendarData.length : 0);
+    console.log('  • Terms:', data.termData ? data.termData.length : 0);
+    console.log('  • Layers:', data.calendarLayers ? data.calendarLayers.length : 0);
+    
+    // Send response
+    console.log('→ Dispatching data to extension...');
     window.dispatchEvent(new CustomEvent('calendarExtensionDataReady', {
       detail: {
         calendarData: data.calendarData,
-        termData: data.termData
+        termData: data.termData,
+        calendarLayers: data.calendarLayers
       }
     }));
-    console.log('[COMPASS WEBPAGE] Data dispatched via custom event');
+    
+    console.log('✓ Data dispatched!');
+    console.log('▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓');
+    console.log('');
   });
   
   // Intercept XMLHttpRequest
@@ -35,99 +200,71 @@
   XMLHttpRequest.prototype.open = function(method, url, ...rest) {
     this.__url = url;
     this.__method = method;
-    console.log('[XHR OPEN]', method, url);
     return originalOpen.call(this, method, url, ...rest);
   };
   
   XMLHttpRequest.prototype.send = function(...args) {
     const xhr = this;
     
-    // Add our handler
     xhr.addEventListener('load', function() {
-      console.log('[XHR LOAD]', xhr.__method, xhr.__url, 'Status:', xhr.status);
-      console.log('[XHR RESPONSE TYPE]', typeof xhr.responseText, 'Length:', xhr.responseText?.length);
-      
-      // Store in debug log
       window.__calendarExtension__.debug.allRequests.push({
         method: xhr.__method,
         url: xhr.__url,
         status: xhr.status,
-        responseLength: xhr.responseText?.length,
         timestamp: new Date().toISOString()
       });
       
       try {
         if (xhr.__url && xhr.__url.toLowerCase().includes('getcalendareventsby')) {
-          console.log('[CALENDAR] Found calendar request!');
-          console.log('[CALENDAR] Response text (first 500 chars):', xhr.responseText?.substring(0, 500));
-          
           const response = JSON.parse(xhr.responseText);
-          console.log('[CALENDAR] Parsed response:', response);
-          console.log('[CALENDAR] Has .d property?', !!response.d);
-          console.log('[CALENDAR] Is .d an array?', Array.isArray(response.d));
-          
           if (response && response.d && Array.isArray(response.d)) {
             window.__calendarExtension__.calendarData = response.d;
-            console.log('✓ ✓ ✓ Intercepted calendar data:', response.d.length, 'events');
-          } else {
-            console.warn('[CALENDAR] Response structure not as expected:', response);
+            console.log(`✓ Intercepted ${response.d.length} calendar events`);
           }
         } else if (xhr.__url && xhr.__url.toLowerCase().includes('getallterms')) {
-          console.log('[TERMS] Found terms request!');
           const response = JSON.parse(xhr.responseText);
-          console.log('[TERMS] Parsed response:', response);
-          
           if (response && response.d && Array.isArray(response.d)) {
             window.__calendarExtension__.termData = response.d;
-            console.log('✓ ✓ ✓ Intercepted term data:', response.d.length, 'terms');
+            console.log(`✓ Intercepted ${response.d.length} terms`);
           }
         }
       } catch (e) {
-        console.error('[PARSE ERROR]', xhr.__url, e);
+        // Ignore parse errors
       }
     });
     
     return originalSend.apply(this, args);
   };
   
-  // Intercept fetch as well
+  // Intercept fetch
   const originalFetch = window.fetch;
   window.fetch = function(...args) {
     const url = typeof args[0] === 'string' ? args[0] : args[0].url;
-    console.log('[FETCH]', url);
     
     return originalFetch.apply(this, args).then(response => {
-      // Clone the response so we can read it without affecting the original
       const clonedResponse = response.clone();
       
       if (url && url.toLowerCase().includes('getcalendareventsby')) {
-        console.log('[FETCH CALENDAR] Found calendar request!');
         clonedResponse.json().then(data => {
-          console.log('[FETCH CALENDAR] Parsed data:', data);
           if (data && data.d && Array.isArray(data.d)) {
             window.__calendarExtension__.calendarData = data.d;
-            console.log('✓ ✓ ✓ Intercepted calendar data (fetch):', data.d.length, 'events');
+            console.log(`✓ Intercepted ${data.d.length} calendar events (fetch)`);
           }
-        }).catch(e => {
-          console.error('[FETCH CALENDAR ERROR]', e);
-        });
+        }).catch(() => {});
       } else if (url && url.toLowerCase().includes('getallterms')) {
-        console.log('[FETCH TERMS] Found terms request!');
         clonedResponse.json().then(data => {
           if (data && data.d && Array.isArray(data.d)) {
             window.__calendarExtension__.termData = data.d;
-            console.log('✓ ✓ ✓ Intercepted term data (fetch):', data.d.length, 'terms');
+            console.log(`✓ Intercepted ${data.d.length} terms (fetch)`);
           }
-        }).catch(e => {
-          console.error('[FETCH TERMS ERROR]', e);
-        });
+        }).catch(() => {});
       }
       
       return response;
     });
   };
   
-  console.log('✓ XHR and Fetch interception active');
-  console.log('✓ Custom event listener registered');
-  console.log('✓ To debug, check: window.__calendarExtension__.debug.allRequests');
+  console.log('✓ Interceptor ready!');
+  console.log('✓ To manually test layer extraction, run: window.__calendarExtension__.extractLayers()');
+  console.log('='.repeat(60));
 })();
